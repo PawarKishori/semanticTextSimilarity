@@ -11,11 +11,13 @@ import gzip
 from random import random
 from preprocess import MyVocabularyProcessor
 import sys
+import pandas as pd
+
 reload(sys)
 sys.setdefaultencoding("utf-8")
 
 class InputHelper(object):
-    
+
     def getTsvData(self, filepath):
         print("Loading training data from "+filepath)
         x1=[]
@@ -43,6 +45,23 @@ class InputHelper(object):
             y.append(0) #np.array([1,0]))
         return np.asarray(x1),np.asarray(x2),np.asarray(y)
 
+    def getpdData(self,filepath):
+        print("Loading testing/labelled data from "+filepath)
+        x1=[]
+        x2=[]
+        y=[]
+
+        questions = pd.read_csv(filepath)
+
+        for i in range(0, len(questions)):
+            x1.append(questions['question1'][i])
+            x2.append(questions['question2'][i])
+            if 'is_duplicate' in questions.columns :
+                y.append(questions['is_duplicate'][i])
+            else:
+                y.append(1)
+
+        return np.asarray(x1),np.asarray(x2),np.asarray(y)
 
     def getTsvTestData(self, filepath):
         print("Loading testing/labelled data from "+filepath)
@@ -57,8 +76,23 @@ class InputHelper(object):
             x1.append(l[1].lower())
             x2.append(l[2].lower())
             y.append(int(l[0])) #np.array([0,1]))
-        return np.asarray(x1),np.asarray(x2),np.asarray(y)  
- 
+        return np.asarray(x1),np.asarray(x2),np.asarray(y)
+
+    def getCsvTestData(self, filepath):
+        print("Loading testing/labelled data from "+filepath)
+        x1=[]
+        x2=[]
+        y=[]
+        # positive samples from file
+        for line in open(filepath):
+            l=line.strip().split(",")
+            if len(l)<3:
+                continue
+            x1.append(l[0].lower())
+            x2.append(l[1].lower())
+           # import pdb;pdb.set_trace()
+            y.append(int(l[2])) #np.array([0,1]))
+        return np.asarray(x1),np.asarray(x2),np.asarray(y)
     def batch_iter(self, data, batch_size, num_epochs, shuffle=True):
         """
         Generates a batch iterator for a dataset.
@@ -79,7 +113,7 @@ class InputHelper(object):
                 start_index = batch_num * batch_size
                 end_index = min((batch_num + 1) * batch_size, data_size)
                 yield shuffled_data[start_index:end_index]
-                
+
     def dumpValidation(self,x1_text,x2_text,y,shuffled_index,dev_idx,i):
         print("dumping validation "+str(i))
         x1_shuffled=x1_text[shuffled_index]
@@ -96,14 +130,14 @@ class InputHelper(object):
             f.close()
         del x1_dev
         del y_dev
-    
+
     # Data Preparatopn
     # ==================================================
-    
-    
+
+
     def getDataSets(self, training_paths, max_document_length, percent_dev, batch_size):
-        x1_text, x2_text, y=self.getTsvData(training_paths)
-        
+        x1_text, x2_text, y=self.getpdData(training_paths)
+
         # Build vocabulary
         print("Building vocabulary")
         vocab_processor = MyVocabularyProcessor(max_document_length,min_frequency=0)
@@ -136,9 +170,24 @@ class InputHelper(object):
         dev_set=(x1_dev,x2_dev,y_dev)
         gc.collect()
         return train_set,dev_set,vocab_processor,sum_no_of_batches
-    
+
     def getTestDataSet(self, data_path, vocab_path, max_document_length):
         x1_temp,x2_temp,y = self.getTsvTestData(data_path)
+
+        # Build vocabulary
+        vocab_processor = MyVocabularyProcessor(max_document_length,min_frequency=0)
+        vocab_processor = vocab_processor.restore(vocab_path)
+        print len(vocab_processor.vocabulary_)
+
+        x1 = np.asarray(list(vocab_processor.transform(x1_temp)))
+        x2 = np.asarray(list(vocab_processor.transform(x2_temp)))
+        # Randomly shuffle data
+        del vocab_processor
+        gc.collect()
+        return x1,x2, y
+
+    def getTestDataSet1(self, data_path, vocab_path, max_document_length):
+        x1_temp,x2_temp,y = self.getpdData(data_path)
 
         # Build vocabulary
         vocab_processor = MyVocabularyProcessor(max_document_length,min_frequency=0)

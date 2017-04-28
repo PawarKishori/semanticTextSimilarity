@@ -18,7 +18,7 @@ from random import random
 tf.flags.DEFINE_integer("embedding_dim", 100, "Dimensionality of character embedding (default: 300)")
 tf.flags.DEFINE_float("dropout_keep_prob", 0.5, "Dropout keep probability (default: 0.5)")
 tf.flags.DEFINE_float("l2_reg_lambda", 0.0, "L2 regularizaion lambda (default: 0.0)")
-tf.flags.DEFINE_string("training_files", "person_match.train2", "training file (default: None)")
+tf.flags.DEFINE_string("training_files", "../preprocess_train.csv", "training file (default: None)")
 tf.flags.DEFINE_integer("hidden_units", 50, "Number of hidden units in softmax regression layer (default:50)")
 
 # Training parameters
@@ -40,7 +40,7 @@ print("")
 if FLAGS.training_files==None:
     print "Input Files List is empty. use --training_files argument."
     exit()
- 
+
 max_document_length=30
 inpH = InputHelper()
 train_set, dev_set, vocab_processor,sum_no_of_batches = inpH.getDataSets(FLAGS.training_files,max_document_length, 10, FLAGS.batch_size)
@@ -50,6 +50,7 @@ train_set, dev_set, vocab_processor,sum_no_of_batches = inpH.getDataSets(FLAGS.t
 print("starting graph def")
 with tf.Graph().as_default():
     session_conf = tf.ConfigProto(
+      intra_op_parallelism_threads=15,
       allow_soft_placement=FLAGS.allow_soft_placement,
       log_device_placement=FLAGS.log_device_placement)
     sess = tf.Session(config=session_conf)
@@ -67,7 +68,7 @@ with tf.Graph().as_default():
         global_step = tf.Variable(0, name="global_step", trainable=False)
         optimizer = tf.train.AdamOptimizer(1e-3)
         print("initialized siameseModel object")
-    
+
     grads_and_vars=optimizer.compute_gradients(siameseModel.loss)
     tr_op_set = optimizer.apply_gradients(grads_and_vars, global_step=global_step)
     print("defined training_ops")
@@ -98,7 +99,7 @@ with tf.Graph().as_default():
 
     # Initialize all variables
     sess.run(tf.initialize_all_variables())
-    
+
     print("init all variables")
     graph_def = tf.get_default_graph().as_graph_def()
     graphpb_txt = str(graph_def)
@@ -137,7 +138,7 @@ with tf.Graph().as_default():
     def dev_step(x1_batch, x2_batch, y_batch):
         """
         A single training step
-        """ 
+        """
         if random()>0.5:
             feed_dict = {
                              siameseModel.input_x1: x1_batch,

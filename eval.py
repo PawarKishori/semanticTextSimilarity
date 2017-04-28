@@ -13,9 +13,9 @@ from input_helpers import InputHelper
 # Eval Parameters
 tf.flags.DEFINE_integer("batch_size", 64, "Batch Size (default: 64)")
 tf.flags.DEFINE_string("checkpoint_dir", "", "Checkpoint directory from training run")
-tf.flags.DEFINE_string("eval_filepath", "match_valid.tsv", "Evaluate on this data (Default: None)")
-tf.flags.DEFINE_string("vocab_filepath", "runs/1479874609/checkpoints/vocab", "Load training time vocabulary (Default: None)")
-tf.flags.DEFINE_string("model", "runs/1479874609/checkpoints/model-32000", "Load trained model checkpoint (Default: None)")
+tf.flags.DEFINE_string("eval_filepath", "../test.csv", "Evaluate on this data (Default: None)")
+tf.flags.DEFINE_string("vocab_filepath", "runs/1491122519/checkpoints/vocab", "Load training time vocabulary (Default: None)")
+tf.flags.DEFINE_string("model", "runs/1491122519/checkpoints/model-99000", "Load trained model checkpoint (Default: None)")
 
 # Misc Parameters
 tf.flags.DEFINE_boolean("allow_soft_placement", True, "Allow device soft device placement")
@@ -35,7 +35,7 @@ if FLAGS.eval_filepath==None or FLAGS.vocab_filepath==None or FLAGS.model==None 
 
 # load data and map id-transform based on training time vocabulary
 inpH = InputHelper()
-x1_test,x2_test,y_test = inpH.getTestDataSet(FLAGS.eval_filepath, FLAGS.vocab_filepath, 30)
+x1_test,x2_test,y_test = inpH.getTestDataSet1(FLAGS.eval_filepath, FLAGS.vocab_filepath, 30)
 
 print("\nEvaluating...\n")
 
@@ -85,6 +85,6 @@ with graph.as_default():
             all_d = np.concatenate([all_d, d])
             print("DEV acc {}".format(batch_acc))
         for ex in all_predictions:
-            print ex 
+            print ex
         correct_predictions = float(np.mean(all_d == y_test))
         print("Accuracy: {:g}".format(correct_predictions))
