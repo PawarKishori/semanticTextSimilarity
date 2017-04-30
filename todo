@@ -1,0 +1,28 @@
+First Run
+original code execution on quora test data
+score,accuracy,train-test error convergence
+##########################################
+Second Run
+Preprocessed Quora dataset with original parameters
+
+score,accuracy,train-test error convergence
+##########################################
+Third Run
+Change of learning rates
+3.1 
+
+score,accuracy,train-test error convergence
+3.2
+
+score,accuracy,train-test error convergence
+##########################################
+Fourth Run
+Check for overfitting
+L1/L2 Regularization
+##########################################
+Fifth run
+Change optimization techniques
+
+##########################################
+Change number of batches
+
