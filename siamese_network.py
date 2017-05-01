@@ -6,7 +6,7 @@ class SiameseLSTM(object):
     A LSTM based deep Siamese network for text similarity.
     Uses an character embedding layer, followed by a biLSTM and Energy Loss layer.
     """
-    
+
     def BiRNN(self, x, dropout, scope, embedding_size, sequence_length):
         n_input=embedding_size
         n_steps=sequence_length
@@ -43,13 +43,20 @@ class SiameseLSTM(object):
             #             outputs = tf.nn.bidirectional_rnn(lstm_fw_cell_m, lstm_bw_cell_m, x,
             #                                             dtype=tf.float32)
         return outputs[-1]
-    
+
     def contrastive_loss(self, y,d,batch_size):
         tmp= y *tf.square(d)
         #tmp= tf.mul(y,tf.square(d))
         tmp2 = (1-y) *tf.square(tf.maximum((1 - d),0))
         return tf.reduce_sum(tmp +tmp2)/batch_size/2
-    
+
+    def log_loss(self, y,d,batch_size):
+        y_hat =  d
+        y_true = y
+        y_hat_softmax = tf.nn.softmax(y_hat)
+        total_loss = tf.reduce_mean(-tf.reduce_sum(y_true * tf.log(y_hat_softmax), [1]))
+        return total_loss
+
     def __init__(
       self, sequence_length, vocab_size, embedding_size, hidden_units, l2_reg_lambda, batch_size):
 
@@ -61,7 +68,7 @@ class SiameseLSTM(object):
 
       # Keeping track of l2 regularization loss (optional)
       l2_loss = tf.constant(0.0, name="l2_loss")
-          
+
       # Embedding layer
       with tf.name_scope("embedding"):
           self.W = tf.Variable(
@@ -80,8 +87,11 @@ class SiameseLSTM(object):
         self.distance = tf.div(self.distance, tf.add(tf.sqrt(tf.reduce_sum(tf.square(self.out1),1,keep_dims=True)),tf.sqrt(tf.reduce_sum(tf.square(self.out2),1,keep_dims=True))))
         self.distance = tf.reshape(self.distance, [-1], name="distance")
       with tf.name_scope("loss"):
-          self.loss = self.contrastive_loss(self.input_y,self.distance, batch_size) 
+          self.loss = self.contrastive_loss(self.input_y,self.distance, batch_size)
       with tf.name_scope("accuracy"):
           correct_predictions = tf.equal(self.distance, self.input_y)
           self.accuracy=tf.reduce_mean(tf.cast(correct_predictions, "float"), name="accuracy")
-     
+
+      tf.scalar_summary("accuracy",self.accuracy)
+      tf.scalar_summary("loss",self.loss)
+      self.merge = tf.merge_all_summaries()

@@ -54,6 +54,7 @@ with tf.Graph().as_default():
       allow_soft_placement=FLAGS.allow_soft_placement,
       log_device_placement=FLAGS.log_device_placement)
     sess = tf.Session(config=session_conf)
+    train_writer = tf.train.SummaryWriter("./logs",sess.graph)
     print("started session")
     with sess.as_default():
         siameseModel = SiameseLSTM(
@@ -99,7 +100,6 @@ with tf.Graph().as_default():
 
     # Initialize all variables
     sess.run(tf.initialize_all_variables())
-
     print("init all variables")
     graph_def = tf.get_default_graph().as_graph_def()
     graphpb_txt = str(graph_def)
@@ -125,7 +125,13 @@ with tf.Graph().as_default():
                              siameseModel.input_y: y_batch,
                              siameseModel.dropout_keep_prob: FLAGS.dropout_keep_prob,
             }
-        _, step, loss, accuracy, dist = sess.run([tr_op_set, global_step, siameseModel.loss, siameseModel.accuracy, siameseModel.distance],  feed_dict)
+        _, step, loss, accuracy, dist,summary = sess.run([tr_op_set, global_step, siameseModel.loss, siameseModel.accuracy, siameseModel.distance,siameseModel.merge],  feed_dict)
+
+        #added summary for variables in tensarboard
+        #tf.scalar_summary("dist",dist)
+        #tf.scalar_summary("step",step)
+        train_writer.add_summary(summary,nn)
+        #train_writer.add_summary([step,loss,accuracy,dist],nn)
         time_str = datetime.datetime.now().isoformat()
         d = np.copy(dist)
         d[d>=0.5]=999.0
