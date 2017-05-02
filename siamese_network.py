@@ -87,7 +87,8 @@ class SiameseLSTM(object):
         self.distance = tf.div(self.distance, tf.add(tf.sqrt(tf.reduce_sum(tf.square(self.out1),1,keep_dims=True)),tf.sqrt(tf.reduce_sum(tf.square(self.out2),1,keep_dims=True))))
         self.distance = tf.reshape(self.distance, [-1], name="distance")
       with tf.name_scope("loss"):
-          self.loss = self.contrastive_loss(self.input_y,self.distance, batch_size)
+          #self.loss = self.contrastive_loss(self.input_y,self.distance, batch_size)
+          self.loss = self.log_loss(self.input_y,self.distance, batch_size)
       with tf.name_scope("accuracy"):
           correct_predictions = tf.equal(self.distance, self.input_y)
           self.accuracy=tf.reduce_mean(tf.cast(correct_predictions, "float"), name="accuracy")
