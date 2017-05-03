@@ -50,11 +50,10 @@ class SiameseLSTM(object):
         tmp2 = (1-y) *tf.square(tf.maximum((1 - d),0))
         return tf.reduce_sum(tmp +tmp2)/batch_size/2
 
-    def log_loss(self, y,d,batch_size):
+    def log_loss(self, y, d, batch_size):
         y_hat =  d
         y_true = y
-        y_hat_softmax = tf.nn.softmax(y_hat)
-        total_loss = tf.reduce_mean(-tf.reduce_sum(y_true * tf.log(y_hat_softmax), [1]))
+        total_loss = -(y) * tf.log(d) - (1-y) * tf.log(1-d)
         return total_loss
 
     def __init__(
@@ -87,8 +86,9 @@ class SiameseLSTM(object):
         self.distance = tf.div(self.distance, tf.add(tf.sqrt(tf.reduce_sum(tf.square(self.out1),1,keep_dims=True)),tf.sqrt(tf.reduce_sum(tf.square(self.out2),1,keep_dims=True))))
         self.distance = tf.reshape(self.distance, [-1], name="distance")
       with tf.name_scope("loss"):
-          #self.loss = self.contrastive_loss(self.input_y,self.distance, batch_size)
-          self.loss = self.log_loss(self.input_y,self.distance, batch_size)
+          #import pdb;pdb.set_trace()
+          self.loss = self.contrastive_loss(self.input_y,self.distance, batch_size)
+          #self.loss = self.log_loss(self.input_y,self.distance, batch_size)
       with tf.name_scope("accuracy"):
           correct_predictions = tf.equal(self.distance, self.input_y)
           self.accuracy=tf.reduce_mean(tf.cast(correct_predictions, "float"), name="accuracy")

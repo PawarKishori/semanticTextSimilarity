@@ -96,4 +96,8 @@ with graph.as_default():
                              'is_duplicate':pd.Series([i for i in all_d]),\
                              'ground_truth':pd.Series(ground_truth)}
         sample_submission = pd.DataFrame(sample_submission)
+
+        sample_submission = sample_submission[['test_id','is_duplicate']]
+        sample_submission["is_duplicate"] = sample_submission["is_duplicate"].astype(int)
+
         sample_submission.to_csv('sample_submission.csv',index=False)
