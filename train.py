@@ -15,7 +15,7 @@ from random import random
 # Parameters
 # ==================================================
 
-tf.flags.DEFINE_integer("embedding_dim", 100, "Dimensionality of character embedding (default: 300)")
+tf.flags.DEFINE_integer("embedding_dim", 300, "Dimensionality of character embedding (default: 300)")
 tf.flags.DEFINE_float("dropout_keep_prob", 0.5, "Dropout keep probability (default: 0.5)")
 tf.flags.DEFINE_float("l2_reg_lambda", 1.0, "L2 regularizaion lambda (default: 0.0)")
 tf.flags.DEFINE_string("training_files", "../preprocess_train.csv", "training file (default: None)")
@@ -151,18 +151,18 @@ with tf.Graph().as_default():
                              siameseModel.input_x1: x1_batch,
                              siameseModel.input_x2: x2_batch,
                              siameseModel.input_y: y_batch,
-                             siameseModel.dropout_keep_prob: FLAGS.dropout_keep_prob,
+                             siameseModel.dropout_keep_prob: 1  #FLAGS.dropout_keep_prob,
             }
         else:
             feed_dict = {
                              siameseModel.input_x1: x2_batch,
                              siameseModel.input_x2: x1_batch,
                              siameseModel.input_y: y_batch,
-                             siameseModel.dropout_keep_prob: FLAGS.dropout_keep_prob,
+                             siameseModel.dropout_keep_prob: 1  #FLAGS.dropout_keep_prob,
             }
         step, loss, accuracy, dist , summary = sess.run([global_step, siameseModel.loss, siameseModel.accuracy, siameseModel.distance , siameseModel.merge],  feed_dict)
 
-        test_writer.add_summary(summary,nn)
+#        test_writer.add_summary(summary,nn)
 
         time_str = datetime.datetime.now().isoformat()
         d = np.copy(dist)
