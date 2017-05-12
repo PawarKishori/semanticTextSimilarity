@@ -15,8 +15,8 @@ import pandas as pd
 tf.flags.DEFINE_integer("batch_size", 64, "Batch Size (default: 64)")
 tf.flags.DEFINE_string("checkpoint_dir", "", "Checkpoint directory from training run")
 tf.flags.DEFINE_string("eval_filepath", "../preprocess_test.csv", "Evaluate on this data (Default: None)")
-tf.flags.DEFINE_string("vocab_filepath", "runs/1494475558/checkpoints/vocab", "Load training time vocabulary (Default: None)")
-tf.flags.DEFINE_string("model", "runs/1494475558/checkpoints/model-399000", "Load trained model checkpoint (Default: None)")
+tf.flags.DEFINE_string("vocab_filepath", "runs/1494518595/checkpoints/vocab", "Load training time vocabulary (Default: None)")
+tf.flags.DEFINE_string("model", "runs/1494518595/checkpoints/model-17000", "Load trained model checkpoint (Default: None)")
 
 # Misc Parameters
 tf.flags.DEFINE_boolean("allow_soft_placement", True, "Allow device soft device placement")
