@@ -71,9 +71,9 @@ class SiameseLSTM(object):
       # Embedding layer
       with tf.name_scope("embedding"):
           self.W = tf.Variable(
-              tf.ones([vocab_size,embedding_size],tf.float32),
+#              tf.ones([vocab_size,embedding_size],tf.float32),
 
-#              tf.zeros([vocab_size,embedding_size],tf.float32),
+              tf.zeros([vocab_size,embedding_size],tf.float32),
 #              tf.random_uniform([vocab_size, embedding_size], -1.0, 1.0),
               trainable=True,name="W")
           self.embedded_chars1 = tf.nn.embedding_lookup(self.W, self.input_x1)
