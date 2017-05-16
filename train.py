@@ -20,6 +20,7 @@ tf.flags.DEFINE_float("dropout_keep_prob", 0.5, "Dropout keep probability (defau
 tf.flags.DEFINE_float("l2_reg_lambda", 1.0, "L2 regularizaion lambda (default: 0.0)")
 tf.flags.DEFINE_string("training_files", "../preprocess_train.csv", "training file (default: None)")
 tf.flags.DEFINE_integer("hidden_units", 50, "Number of hidden units in softmax regression layer (default:50)")
+tf.flags.DEFINE_string("word2vec", "word2vec/GoogleNews-vectors-negative300.bin","Google's pretrained embedding")
 
 # Training parameters
 tf.flags.DEFINE_integer("batch_size", 64, "Batch Size (default: 64)")
@@ -86,6 +87,7 @@ with tf.Graph().as_default():
     print("defined gradient summaries")
     # Output directory for models and summaries
     timestamp = str(int(time.time()))
+
     out_dir = os.path.abspath(os.path.join(os.path.curdir, "runs", timestamp))
     print("Writing to {}\n".format(out_dir))
 
@@ -107,6 +109,32 @@ with tf.Graph().as_default():
     with open(os.path.join(checkpoint_dir, "graphpb.txt"), 'w') as f:
         f.write(graphpb_txt)
 
+
+    if FLAGS.word2vec:
+        # initial matrix with random uniform
+        initW = np.random.uniform(-0.25,0.25,(len(vocab_processor.vocabulary_), FLAGS.embedding_dim))
+        # load any vectors from the glove
+        print("Load word2vec file {}\n".format(FLAGS.word2vec))
+        with open(FLAGS.word2vec, "rb") as f:
+            header = f.readline()
+            vocab_size, layer1_size = map(int, header.split())
+            binary_len = np.dtype('float32').itemsize * layer1_size
+            for line in xrange(vocab_size):
+                word = []
+                while True:
+                    ch = f.read(1)
+                    if ch == ' ':
+                        word = ''.join(word)
+                        break
+                    if ch != '\n':
+                        word.append(ch)
+                idx = vocab_processor.vocabulary_.get(word)
+                if idx != 0:
+                    initW[idx] = np.fromstring(f.read(binary_len), dtype='float32')
+                else:
+                    f.read(binary_len)
+
+            sess.run(siameseModel.W.assign(initW))
 
     def train_step(x1_batch, x2_batch, y_batch):
         """
