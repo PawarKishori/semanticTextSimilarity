@@ -51,10 +51,10 @@ class SiameseLSTM(object):
         return tf.reduce_sum(tmp +tmp2)/batch_size/2
 
     def log_loss(self, y, d, batch_size):
-        y_hat =  d
-        y_true = y
-        total_loss = -(y) * tf.log(d) - (1-y) * tf.log(1-d)
-        return total_loss
+        tmp = y * tf.log(d)
+        tmp2 = (1-y)*tf.log(1-d)
+        tf.reduce_sum(tmp+tmp2)/batch_size
+
 
     def __init__(
       self, sequence_length, vocab_size, embedding_size, hidden_units, l2_reg_lambda, batch_size):
