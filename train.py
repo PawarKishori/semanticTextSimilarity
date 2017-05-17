@@ -1,5 +1,4 @@
 #! /usr/bin/env python
-#train.py
 import tensorflow as tf
 import numpy as np
 import re
